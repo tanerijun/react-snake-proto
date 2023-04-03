@@ -1,6 +1,16 @@
 "use client"
 
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
+
+// Interface
+interface Coordinate {
+	x: number
+	y: number
+}
+
+// Constants
+const SPEED = 75 // ms; This will be passed to setInterval, so the lower the faster
+const SNAKE_SEGMENT_SIZE = 5 // px; How many pixels each snake segment will take
 
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -56,15 +66,8 @@ const Canvas = forwardRef<
 	)
 })
 
-interface Coordinate {
-	x: number
-	y: number
-}
-
 // Draws stuffs on the canvas
 function draw(ctx: CanvasRenderingContext2D, snakeBody: Coordinate[]) {
-	const SNAKE_SEGMENT_SIZE = 5
-
 	ctx.fillStyle = "black" // TODO: Use color from design system
 	for (const { x, y } of snakeBody) {
 		ctx.fillRect(x, y, SNAKE_SEGMENT_SIZE, SNAKE_SEGMENT_SIZE)
@@ -76,4 +79,27 @@ function useSnakeGame() {
 	const [snakeBody, setSnakeBody] = useState<Coordinate[]>([{ x: 0, y: 0 }])
 
 	return { snakeBody }
+}
+
+// https://usehooks-ts.com/react-hook/use-interval
+function useInterval(callback: () => void, delay: number | null) {
+	const savedCallback = useRef(callback)
+
+	// Remember the latest callback if it changes.
+	useLayoutEffect(() => {
+		savedCallback.current = callback
+	}, [callback])
+
+	// Set up the interval.
+	useEffect(() => {
+		// Don't schedule if no delay is specified.
+		// Note: 0 is a valid value for delay.
+		if (!delay && delay !== 0) {
+			return
+		}
+
+		const id = setInterval(() => savedCallback.current(), delay)
+
+		return () => clearInterval(id)
+	}, [delay])
 }
