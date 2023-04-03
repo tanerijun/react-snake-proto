@@ -117,19 +117,32 @@ function useSnakeGame() {
 
 	const handleKeydown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
 		switch (e.key) {
-			case "ArrowUp" || "w" || "W":
+			case "ArrowUp":
+			case "w":
+			case "W":
+				if (direction === "DOWN") return // prevent 180 degree turn
 				setDirection("UP")
 				break
-			case "ArrowDown" || "s" || "S":
+			case "ArrowDown":
+			case "s":
+			case "S":
+				if (direction === "UP") return // prevent 180 degree turn
 				setDirection("DOWN")
 				break
-			case "ArrowLeft" || "a" || "A":
+			case "ArrowLeft":
+			case "a":
+			case "A":
+				if (direction === "RIGHT") return // prevent 180 degree turn
 				setDirection("LEFT")
 				break
-			case "ArrowRight" || "d" || "D":
+			case "ArrowRight":
+			case "d":
+			case "D":
+				if (direction === "LEFT") return // prevent 180 degree turn
 				setDirection("RIGHT")
 				break
 		}
+		console.log(e.key)
 	}
 
 	const handleFrameUpdate = () => {
