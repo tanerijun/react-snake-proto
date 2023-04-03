@@ -14,23 +14,23 @@ const SNAKE_SEGMENT_SIZE = 5 // px; How many pixels each snake segment will take
 
 // Helpers
 const moveSnake = {
-	up: (snakeBody: Coordinate[]) => {
-		return snakeBody.map((segment) => {
+	up: (segments: Coordinate[]) => {
+		return segments.map((segment) => {
 			return { x: segment.x, y: segment.y - SNAKE_SEGMENT_SIZE }
 		})
 	},
-	down: (snakeBody: Coordinate[]) => {
-		return snakeBody.map((segment) => {
+	down: (segments: Coordinate[]) => {
+		return segments.map((segment) => {
 			return { x: segment.x, y: segment.y + SNAKE_SEGMENT_SIZE }
 		})
 	},
-	left: (snakeBody: Coordinate[]) => {
-		return snakeBody.map((segment) => {
+	left: (segments: Coordinate[]) => {
+		return segments.map((segment) => {
 			return { x: segment.x - SNAKE_SEGMENT_SIZE, y: segment.y }
 		})
 	},
-	right: (snakeBody: Coordinate[]) => {
-		return snakeBody.map((segment) => {
+	right: (segments: Coordinate[]) => {
+		return segments.map((segment) => {
 			return { x: segment.x + SNAKE_SEGMENT_SIZE, y: segment.y }
 		})
 	},
@@ -101,9 +101,9 @@ const Canvas = forwardRef<
 })
 
 // Draws stuffs on the canvas
-function draw(ctx: CanvasRenderingContext2D, snakeBody: Coordinate[]) {
+function draw(ctx: CanvasRenderingContext2D, segments: Coordinate[]) {
 	ctx.fillStyle = "black" // TODO: Use color from design system
-	for (const { x, y } of snakeBody) {
+	for (const { x, y } of segments) {
 		ctx.fillRect(x, y, SNAKE_SEGMENT_SIZE, SNAKE_SEGMENT_SIZE)
 	}
 }
@@ -142,7 +142,6 @@ function useSnakeGame() {
 				setDirection("RIGHT")
 				break
 		}
-		console.log(e.key)
 	}
 
 	const handleFrameUpdate = () => {
