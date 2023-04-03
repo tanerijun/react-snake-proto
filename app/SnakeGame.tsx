@@ -12,14 +12,44 @@ interface Coordinate {
 const SPEED = 75 // ms; This will be passed to setInterval, so the lower the faster
 const SNAKE_SEGMENT_SIZE = 5 // px; How many pixels each snake segment will take
 
+// Helpers
+const moveSnake = {
+	up: (snakeBody: Coordinate[]) => {
+		return snakeBody.map((segment) => {
+			return { x: segment.x, y: segment.y - SNAKE_SEGMENT_SIZE }
+		})
+	},
+	down: (snakeBody: Coordinate[]) => {
+		return snakeBody.map((segment) => {
+			return { x: segment.x, y: segment.y + SNAKE_SEGMENT_SIZE }
+		})
+	},
+	left: (snakeBody: Coordinate[]) => {
+		return snakeBody.map((segment) => {
+			return { x: segment.x - SNAKE_SEGMENT_SIZE, y: segment.y }
+		})
+	},
+	right: (snakeBody: Coordinate[]) => {
+		return snakeBody.map((segment) => {
+			return { x: segment.x + SNAKE_SEGMENT_SIZE, y: segment.y }
+		})
+	},
+}
+
+// Entry point
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
-	const { snakeBody } = useSnakeGame()
+	const { segments, handleKeydown } = useSnakeGame()
 
-	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, snakeBody)
+	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments)
 
 	return (
-		<Canvas ref={canvasRef} draw={drawFn}>
+		<Canvas
+			ref={canvasRef}
+			draw={drawFn}
+			onKeyDown={handleKeydown}
+			tabIndex={0}
+		>
 			<h1>Snake Game</h1>
 		</Canvas>
 	)
@@ -76,9 +106,53 @@ function draw(ctx: CanvasRenderingContext2D, snakeBody: Coordinate[]) {
 
 // Controls the logic of the game
 function useSnakeGame() {
-	const [snakeBody, setSnakeBody] = useState<Coordinate[]>([{ x: 0, y: 0 }])
+	const [segments, setSegments] = useState<Coordinate[]>([{ x: 0, y: 0 }])
+	const [direction, setDirection] = useState<
+		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
+	>(undefined)
 
-	return { snakeBody }
+	const handleKeydown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+		switch (e.key) {
+			case "ArrowUp" || "w" || "W":
+				setDirection("UP")
+				break
+			case "ArrowDown" || "s" || "S":
+				setDirection("DOWN")
+				break
+			case "ArrowLeft" || "a" || "A":
+				setDirection("LEFT")
+				break
+			case "ArrowRight" || "d" || "D":
+				setDirection("RIGHT")
+				break
+		}
+	}
+
+	const handleFrameUpdate = () => {
+		let newSegmentCoordinates
+
+		switch (direction) {
+			case "UP":
+				newSegmentCoordinates = moveSnake.up(segments)
+				break
+			case "DOWN":
+				newSegmentCoordinates = moveSnake.down(segments)
+				break
+			case "LEFT":
+				newSegmentCoordinates = moveSnake.left(segments)
+				break
+			case "RIGHT":
+				newSegmentCoordinates = moveSnake.right(segments)
+				break
+		}
+
+		if (!newSegmentCoordinates) return
+		setSegments(newSegmentCoordinates)
+	}
+
+	useInterval(handleFrameUpdate, SPEED)
+
+	return { segments, handleKeydown }
 }
 
 // https://usehooks-ts.com/react-hook/use-interval
