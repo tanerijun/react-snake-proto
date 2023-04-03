@@ -77,6 +77,10 @@ const Canvas = forwardRef<
 		if (!ctx) return
 
 		draw(ctx)
+
+		return () => {
+			ctx.clearRect(0, 0, canvas.width, canvas.height)
+		}
 	}, [canvasRef, draw])
 
 	if (!canvasRef) return null
