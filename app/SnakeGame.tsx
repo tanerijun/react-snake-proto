@@ -10,7 +10,7 @@ interface Coordinate {
 
 // Constants
 const SPEED = 75 // ms; This will be passed to setInterval, so the lower the faster
-const SNAKE_SEGMENT_SIZE = 5 // px; How many pixels each snake segment will take
+const SEGMENT_SIZE = 5 // px; How many pixels each snake segment or food will take
 const CANVAS_WIDTH = 300 // px; internal canvas width
 const CANVAS_HEIGHT = 150 // px; internal canvas height
 
@@ -18,22 +18,22 @@ const CANVAS_HEIGHT = 150 // px; internal canvas height
 const moveSnake = {
 	up: (segments: Coordinate[]) => {
 		return segments.map((segment) => {
-			return { x: segment.x, y: segment.y - SNAKE_SEGMENT_SIZE }
+			return { x: segment.x, y: segment.y - SEGMENT_SIZE }
 		})
 	},
 	down: (segments: Coordinate[]) => {
 		return segments.map((segment) => {
-			return { x: segment.x, y: segment.y + SNAKE_SEGMENT_SIZE }
+			return { x: segment.x, y: segment.y + SEGMENT_SIZE }
 		})
 	},
 	left: (segments: Coordinate[]) => {
 		return segments.map((segment) => {
-			return { x: segment.x - SNAKE_SEGMENT_SIZE, y: segment.y }
+			return { x: segment.x - SEGMENT_SIZE, y: segment.y }
 		})
 	},
 	right: (segments: Coordinate[]) => {
 		return segments.map((segment) => {
-			return { x: segment.x + SNAKE_SEGMENT_SIZE, y: segment.y }
+			return { x: segment.x + SEGMENT_SIZE, y: segment.y }
 		})
 	},
 }
@@ -41,9 +41,9 @@ const moveSnake = {
 // Entry point
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
-	const { segments, handleKeydown } = useSnakeGame()
+	const { segments, food, handleKeydown } = useSnakeGame()
 
-	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments)
+	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments, food)
 
 	return (
 		<Canvas
@@ -103,16 +103,28 @@ const Canvas = forwardRef<
 })
 
 // Draws stuffs on the canvas
-function draw(ctx: CanvasRenderingContext2D, segments: Coordinate[]) {
-	ctx.fillStyle = "black" // TODO: Use color from design system
+function draw(
+	ctx: CanvasRenderingContext2D,
+	segments: Coordinate[],
+	food: Coordinate | undefined
+) {
+	// Draw food
+	if (food) {
+		ctx.fillStyle = "red" // TODO: Use color from design system
+		ctx.fillRect(food.x, food.y, SEGMENT_SIZE, SEGMENT_SIZE)
+	}
+
+	// Draw snake
+	ctx.fillStyle = "black" // TODO: Use color from design system; Idea: Give the tail an afterglow effect
 	for (const { x, y } of segments) {
-		ctx.fillRect(x, y, SNAKE_SEGMENT_SIZE, SNAKE_SEGMENT_SIZE)
+		ctx.fillRect(x, y, SEGMENT_SIZE, SEGMENT_SIZE)
 	}
 }
 
 // Controls the logic of the game
 function useSnakeGame() {
 	const [segments, setSegments] = useState<Coordinate[]>([{ x: 0, y: 0 }])
+	const [food, setFood] = useState<Coordinate | undefined>(undefined)
 	const [direction, setDirection] = useState<
 		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
 	>(undefined)
@@ -120,10 +132,10 @@ function useSnakeGame() {
 	const headCoordinate = segments[segments.length - 1]
 	const isTouchingTopBoundary = headCoordinate.y <= 0
 	const isTouchingBottomBoundary =
-		headCoordinate.y >= CANVAS_HEIGHT - SNAKE_SEGMENT_SIZE
+		headCoordinate.y >= CANVAS_HEIGHT - SEGMENT_SIZE
 	const isTouchingLeftBoundary = headCoordinate.x <= 0
 	const isTouchingRightBoundary =
-		headCoordinate.x >= CANVAS_WIDTH - SNAKE_SEGMENT_SIZE
+		headCoordinate.x >= CANVAS_WIDTH - SEGMENT_SIZE
 	const isOnLeftSide = headCoordinate.x <= CANVAS_WIDTH / 2
 	const isOnTopSide = headCoordinate.y <= CANVAS_HEIGHT / 2
 
@@ -210,9 +222,15 @@ function useSnakeGame() {
 		setSegments(newSegmentCoordinates)
 	}
 
+	useEffect(() => {
+		if (!food) {
+			setFood(spawnFoodRandom())
+		}
+	}, [food])
+
 	useInterval(handleFrameUpdate, SPEED)
 
-	return { segments, handleKeydown }
+	return { segments, food, handleKeydown }
 }
 
 // https://usehooks-ts.com/react-hook/use-interval
@@ -236,4 +254,10 @@ function useInterval(callback: () => void, delay: number | null) {
 
 		return () => clearInterval(id)
 	}, [delay])
+}
+
+function spawnFoodRandom(): Coordinate {
+	const x = Math.floor(Math.random() * CANVAS_WIDTH)
+	const y = Math.floor(Math.random() * CANVAS_HEIGHT)
+	return { x, y }
 }
