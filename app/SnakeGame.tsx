@@ -139,7 +139,6 @@ function useSnakeGame() {
 	const isOnLeftSide = headCoordinate.x <= CANVAS_WIDTH / 2
 	const isOnTopSide = headCoordinate.y <= CANVAS_HEIGHT / 2
 
-
 	const handleKeydown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
 		switch (e.key) {
 			case "ArrowUp":
@@ -169,8 +168,41 @@ function useSnakeGame() {
 		}
 	}
 
+	const isSnakeGoingToEatFoodNextFrame = () => {
+		if (!food) return false
+
+		switch (direction) {
+			case "UP":
+				return (
+					headCoordinate.x === food.x &&
+					headCoordinate.y - SEGMENT_SIZE === food.y
+				)
+			case "DOWN":
+				return (
+					headCoordinate.x === food.x &&
+					headCoordinate.y + SEGMENT_SIZE === food.y
+				)
+			case "LEFT":
+				return (
+					headCoordinate.x - SEGMENT_SIZE === food.x &&
+					headCoordinate.y === food.y
+				)
+			case "RIGHT":
+				return (
+					headCoordinate.x + SEGMENT_SIZE === food.x &&
+					headCoordinate.y === food.y
+				)
+		}
+	}
+
 	const handleFrameUpdate = () => {
 		let newSegmentCoordinates: Coordinate[] | undefined
+
+		if (food && isSnakeGoingToEatFoodNextFrame()) {
+			setSegments([...segments, food])
+			setFood(undefined)
+			return
+		}
 
 		switch (direction) {
 			case "UP":
@@ -217,13 +249,6 @@ function useSnakeGame() {
 					newSegmentCoordinates = moveSnake.right(segments)
 				}
 				break
-		}
-
-		// Check if food is eaten
-		if (food && headCoordinate.x === food.x && headCoordinate.y === food.y) {
-			setSegments([...segments, food])
-			setFood(undefined)
-			return
 		}
 
 		if (!newSegmentCoordinates) return
