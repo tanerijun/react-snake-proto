@@ -139,6 +139,7 @@ function useSnakeGame() {
 	const isOnLeftSide = headCoordinate.x <= CANVAS_WIDTH / 2
 	const isOnTopSide = headCoordinate.y <= CANVAS_HEIGHT / 2
 
+
 	const handleKeydown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
 		switch (e.key) {
 			case "ArrowUp":
@@ -218,6 +219,13 @@ function useSnakeGame() {
 				break
 		}
 
+		// Check if food is eaten
+		if (food && headCoordinate.x === food.x && headCoordinate.y === food.y) {
+			setSegments([...segments, food])
+			setFood(undefined)
+			return
+		}
+
 		if (!newSegmentCoordinates) return
 		setSegments(newSegmentCoordinates)
 	}
@@ -257,7 +265,9 @@ function useInterval(callback: () => void, delay: number | null) {
 }
 
 function spawnFoodRandom(): Coordinate {
-	const x = Math.floor(Math.random() * CANVAS_WIDTH)
-	const y = Math.floor(Math.random() * CANVAS_HEIGHT)
+	const x =
+		Math.floor((Math.random() * CANVAS_WIDTH) / SEGMENT_SIZE) * SEGMENT_SIZE
+	const y =
+		Math.floor((Math.random() * CANVAS_HEIGHT) / SEGMENT_SIZE) * SEGMENT_SIZE
 	return { x, y }
 }
