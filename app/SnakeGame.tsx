@@ -17,24 +17,28 @@ const CANVAS_HEIGHT = 150 // px; internal canvas height
 // Helpers
 const moveSnake = {
 	up: (segments: Coordinate[]) => {
-		return segments.map((segment) => {
-			return { x: segment.x, y: segment.y - SEGMENT_SIZE }
-		})
+		const newSegments = [...segments]
+		newSegments.pop()
+		newSegments.unshift({ x: segments[0].x, y: segments[0].y - SEGMENT_SIZE })
+		return newSegments
 	},
 	down: (segments: Coordinate[]) => {
-		return segments.map((segment) => {
-			return { x: segment.x, y: segment.y + SEGMENT_SIZE }
-		})
+		const newSegments = [...segments]
+		newSegments.pop()
+		newSegments.unshift({ x: segments[0].x, y: segments[0].y + SEGMENT_SIZE })
+		return newSegments
 	},
 	left: (segments: Coordinate[]) => {
-		return segments.map((segment) => {
-			return { x: segment.x - SEGMENT_SIZE, y: segment.y }
-		})
+		const newSegments = [...segments]
+		newSegments.pop()
+		newSegments.unshift({ x: segments[0].x - SEGMENT_SIZE, y: segments[0].y })
+		return newSegments
 	},
 	right: (segments: Coordinate[]) => {
-		return segments.map((segment) => {
-			return { x: segment.x + SEGMENT_SIZE, y: segment.y }
-		})
+		const newSegments = [...segments]
+		newSegments.pop()
+		newSegments.unshift({ x: segments[0].x + SEGMENT_SIZE, y: segments[0].y })
+		return newSegments
 	},
 }
 
@@ -129,7 +133,7 @@ function useSnakeGame() {
 		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
 	>(undefined)
 
-	const headCoordinate = segments[segments.length - 1]
+	const headCoordinate = segments[0]
 	const isTouchingTopBoundary = headCoordinate.y <= 0
 	const isTouchingBottomBoundary =
 		headCoordinate.y >= CANVAS_HEIGHT - SEGMENT_SIZE
