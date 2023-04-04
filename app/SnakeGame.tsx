@@ -11,6 +11,8 @@ interface Coordinate {
 // Constants
 const SPEED = 75 // ms; This will be passed to setInterval, so the lower the faster
 const SNAKE_SEGMENT_SIZE = 5 // px; How many pixels each snake segment will take
+const CANVAS_WIDTH = 300 // px; internal canvas width
+const CANVAS_HEIGHT = 150 // px; internal canvas height
 
 // Helpers
 const moveSnake = {
@@ -38,7 +40,7 @@ const moveSnake = {
 
 // Entry point
 export default function SnakeGame() {
-	const canvasRef = useRef<HTMLCanvasElement>(null)
+	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const { segments, handleKeydown } = useSnakeGame()
 
 	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments)
@@ -91,8 +93,8 @@ const Canvas = forwardRef<
 				<canvas
 					ref={canvasRef}
 					className="h-full w-full border-2 bg-white"
-					width={300} // internal canvas width
-					height={150} // internal canvas height
+					width={CANVAS_WIDTH} // internal canvas width
+					height={CANVAS_HEIGHT} // internal canvas height
 					{...props}
 				/>
 			</div>
@@ -114,6 +116,16 @@ function useSnakeGame() {
 	const [direction, setDirection] = useState<
 		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
 	>(undefined)
+
+	const headCoordinate = segments[segments.length - 1]
+	const isTouchingTopBoundary = headCoordinate.y <= 0
+	const isTouchingBottomBoundary =
+		headCoordinate.y >= CANVAS_HEIGHT - SNAKE_SEGMENT_SIZE
+	const isTouchingLeftBoundary = headCoordinate.x <= 0
+	const isTouchingRightBoundary =
+		headCoordinate.x >= CANVAS_WIDTH - SNAKE_SEGMENT_SIZE
+	const isOnLeftSide = headCoordinate.x <= CANVAS_WIDTH / 2
+	const isOnTopSide = headCoordinate.y <= CANVAS_HEIGHT / 2
 
 	const handleKeydown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
 		switch (e.key) {
@@ -145,20 +157,52 @@ function useSnakeGame() {
 	}
 
 	const handleFrameUpdate = () => {
-		let newSegmentCoordinates
+		let newSegmentCoordinates: Coordinate[] | undefined
 
 		switch (direction) {
 			case "UP":
-				newSegmentCoordinates = moveSnake.up(segments)
+				if (isTouchingTopBoundary) {
+					if (isOnLeftSide) {
+						setDirection("RIGHT")
+					} else {
+						setDirection("LEFT")
+					}
+				} else {
+					newSegmentCoordinates = moveSnake.up(segments)
+				}
 				break
 			case "DOWN":
-				newSegmentCoordinates = moveSnake.down(segments)
+				if (isTouchingBottomBoundary) {
+					if (isOnLeftSide) {
+						setDirection("RIGHT")
+					} else {
+						setDirection("LEFT")
+					}
+				} else {
+					newSegmentCoordinates = moveSnake.down(segments)
+				}
 				break
 			case "LEFT":
-				newSegmentCoordinates = moveSnake.left(segments)
+				if (isTouchingLeftBoundary) {
+					if (isOnTopSide) {
+						setDirection("DOWN")
+					} else {
+						setDirection("UP")
+					}
+				} else {
+					newSegmentCoordinates = moveSnake.left(segments)
+				}
 				break
 			case "RIGHT":
-				newSegmentCoordinates = moveSnake.right(segments)
+				if (isTouchingRightBoundary) {
+					if (isOnTopSide) {
+						setDirection("DOWN")
+					} else {
+						setDirection("UP")
+					}
+				} else {
+					newSegmentCoordinates = moveSnake.right(segments)
+				}
 				break
 		}
 
