@@ -1,6 +1,5 @@
 "use client"
 
-import FocusTrap from "focus-trap-react"
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 // Types and Interfaces
