@@ -56,14 +56,25 @@ const moveSnake = {
 	},
 }
 
+function spawnFoodRandom(): Coordinate {
+	const x =
+		Math.floor((Math.random() * CANVAS_WIDTH) / SEGMENT_SIZE) * SEGMENT_SIZE
+	const y =
+		Math.floor((Math.random() * CANVAS_HEIGHT) / SEGMENT_SIZE) * SEGMENT_SIZE
+	return { x, y }
+}
+
 // Entry point
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE)
+	const [score, setScore] = useState(0)
+	const [highscore, setHighscore] = useState(0)
 
 	const { segments, food, handleKeydown, resetGame } = useSnakeGame(
 		gameState,
-		setGameState
+		setGameState,
+		setScore
 	)
 
 	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments, food)
@@ -89,19 +100,23 @@ export default function SnakeGame() {
 		focusCanvas()
 	}
 
+	useEffect(() => {
+		if (score > highscore) setHighscore(score)
+	}, [score, highscore])
+
 	return (
 		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center space-y-8">
 			<div className="flex space-x-24 text-white">
 				<span>
 					Score:{" "}
 					<span className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-						12
+						{score}
 					</span>
 				</span>
 				<span>
 					Highscore:{" "}
 					<span className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-						50
+						{highscore}
 					</span>
 				</span>
 			</div>
@@ -214,7 +229,8 @@ function draw(
 // Controls the logic of the game
 function useSnakeGame(
 	gameState: GameState,
-	setGameState: React.Dispatch<React.SetStateAction<GameState>>
+	setGameState: React.Dispatch<React.SetStateAction<GameState>>,
+	setScore: React.Dispatch<React.SetStateAction<number>>
 ) {
 	const [segments, setSegments] = useState<Coordinate[]>(
 		INITIAL_SPAWN_COORDINATES
@@ -314,6 +330,7 @@ function useSnakeGame(
 
 		if (food && isSnakeGoingToEatFoodNextFrame()) {
 			setSegments([...segments, food])
+			setScore((score) => score + 1)
 			setFood(undefined)
 			return
 		}
@@ -372,6 +389,7 @@ function useSnakeGame(
 	const resetGame = () => {
 		setSegments(INITIAL_SPAWN_COORDINATES)
 		setFood(undefined)
+		setScore(0)
 		setDirection(INITIAL_DIRECTION)
 	}
 
@@ -407,12 +425,4 @@ function useInterval(callback: () => void, delay: number | null) {
 
 		return () => clearInterval(id)
 	}, [delay])
-}
-
-function spawnFoodRandom(): Coordinate {
-	const x =
-		Math.floor((Math.random() * CANVAS_WIDTH) / SEGMENT_SIZE) * SEGMENT_SIZE
-	const y =
-		Math.floor((Math.random() * CANVAS_HEIGHT) / SEGMENT_SIZE) * SEGMENT_SIZE
-	return { x, y }
 }
