@@ -13,7 +13,7 @@ interface Coordinate {
 }
 
 // Constants
-const SPEED = 75 // ms; This will be passed to setInterval, so the lower the faster
+const SPEED = 50 // ms; This will be passed to setInterval, so the lower the faster
 const SEGMENT_SIZE = 5 // px; How many pixels each snake segment or food will take
 const CANVAS_WIDTH = 300 // px; internal canvas width
 const CANVAS_HEIGHT = 150 // px; internal canvas height
@@ -26,6 +26,7 @@ const INITIAL_SPAWN_COORDINATES = [
 ] // px; Where the snake will spawn
 const INITIAL_DIRECTION: Direction = "RIGHT"
 const INITIAL_GAME_STATE: GameState = "PAUSED"
+const SNAKE_TAIL_LENGTH = 2 // SEGMENT_SIZE; This will act as afterimage of movement
 
 // Helpers
 const moveSnake = {
@@ -96,23 +97,17 @@ export default function SnakeGame() {
 			<div className="mt-8 w-fit rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
 				{gameState === "GAME_OVER" ? (
 					<button
-						className="bg-white px-6 py-2 text-blue-800"
+						className="bg-white px-6 py-2 text-black"
 						onClick={restartGame}
 					>
 						Reset
 					</button>
 				) : gameState === "PLAYING" ? (
-					<button
-						className="bg-white px-6 py-2 text-blue-800"
-						onClick={pauseGame}
-					>
+					<button className="bg-white px-6 py-2 text-black" onClick={pauseGame}>
 						Pause
 					</button>
 				) : (
-					<button
-						className="bg-white px-6 py-2 text-blue-800"
-						onClick={playGame}
-					>
+					<button className="bg-white px-6 py-2 text-black" onClick={playGame}>
 						Play
 					</button>
 				)}
@@ -169,15 +164,30 @@ function draw(
 	segments: Coordinate[],
 	food: Coordinate | undefined
 ) {
+	const head = segments[0]
+	const body = segments.slice(1, segments.length - SNAKE_TAIL_LENGTH)
+	const tail = segments.slice(segments.length - SNAKE_TAIL_LENGTH)
+
 	// Draw food
 	if (food) {
 		ctx.fillStyle = "red" // TODO: Use color from design system
 		ctx.fillRect(food.x, food.y, SEGMENT_SIZE, SEGMENT_SIZE)
 	}
 
-	// Draw snake
-	ctx.fillStyle = "white" // TODO: Use color from design system; Idea: Give the tail an afterglow effect
-	for (const { x, y } of segments) {
+	// Draw snake's head
+	ctx.fillStyle = "rgba(255, 255, 255, 1)"
+	ctx.fillRect(head.x, head.y, SEGMENT_SIZE, SEGMENT_SIZE)
+
+	// Draw snake's body
+	ctx.fillStyle = "rgba(255, 255, 255, 0.8" // TODO: Use color from design system
+	for (const { x, y } of body) {
+		ctx.fillRect(x, y, SEGMENT_SIZE, SEGMENT_SIZE)
+	}
+
+	// Draw snake's tail
+	for (let i = 0; i < tail.length; i++) {
+		const { x, y } = tail[i]
+		ctx.fillStyle = `rgba(255, 255, 255, ${0.1 * (tail.length - i)})`
 		ctx.fillRect(x, y, SEGMENT_SIZE, SEGMENT_SIZE)
 	}
 }
