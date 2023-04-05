@@ -154,7 +154,7 @@ const Canvas = forwardRef<
 	return (
 		<canvas
 			ref={canvasRef}
-			className="h-full w-full border-2 bg-black"
+			className="h-full w-full bg-black focus:outline-none"
 			width={CANVAS_WIDTH} // internal canvas width
 			height={CANVAS_HEIGHT} // internal canvas height
 			tabIndex={0}
