@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 // Types and Interfaces
-type GameState = "PLAYING" | "GAME_OVER"
+type GameState = "PLAYING" | "PAUSED" | "GAME_OVER"
 
 interface Coordinate {
 	x: number
@@ -62,18 +62,49 @@ export default function SnakeGame() {
 		setGameState("PLAYING")
 	}
 
+	const pauseGame = () => {
+		setGameState("PAUSED")
+	}
+
+	const playGame = () => {
+		setGameState("PLAYING")
+	}
+
 	return (
-		<>
-			<Canvas
-				ref={canvasRef}
-				draw={drawFn}
-				onKeyDown={handleKeydown}
-				tabIndex={0}
-			/>
-			{gameState === "GAME_OVER" && (
-				<button onClick={restartGame}>Play Again</button>
-			)}
-		</>
+		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center">
+			<div className="h-[300px] w-[600px] rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
+				<Canvas
+					ref={canvasRef}
+					draw={drawFn}
+					onKeyDown={handleKeydown}
+					tabIndex={0}
+				/>
+			</div>
+			<div className="mt-8 w-fit rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
+				{gameState === "GAME_OVER" ? (
+					<button
+						className="bg-white px-6 py-2 text-blue-800"
+						onClick={restartGame}
+					>
+						Reset
+					</button>
+				) : gameState === "PLAYING" ? (
+					<button
+						className="bg-white px-6 py-2 text-blue-800"
+						onClick={pauseGame}
+					>
+						Pause
+					</button>
+				) : (
+					<button
+						className="bg-white px-6 py-2 text-blue-800"
+						onClick={playGame}
+					>
+						Play
+					</button>
+				)}
+			</div>
+		</div>
 	)
 }
 
@@ -108,17 +139,13 @@ const Canvas = forwardRef<
 	if (!canvasRef) return null
 
 	return (
-		<div className="mx-auto flex min-h-screen max-w-xl items-center justify-center">
-			<div className="h-[300px] w-[600px] bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
-				<canvas
-					ref={canvasRef}
-					className="h-full w-full border-2 bg-white"
-					width={CANVAS_WIDTH} // internal canvas width
-					height={CANVAS_HEIGHT} // internal canvas height
-					{...props}
-				/>
-			</div>
-		</div>
+		<canvas
+			ref={canvasRef}
+			className="h-full w-full border-2 bg-black"
+			width={CANVAS_WIDTH} // internal canvas width
+			height={CANVAS_HEIGHT} // internal canvas height
+			{...props}
+		/>
 	)
 })
 
@@ -135,7 +162,7 @@ function draw(
 	}
 
 	// Draw snake
-	ctx.fillStyle = "black" // TODO: Use color from design system; Idea: Give the tail an afterglow effect
+	ctx.fillStyle = "white" // TODO: Use color from design system; Idea: Give the tail an afterglow effect
 	for (const { x, y } of segments) {
 		ctx.fillRect(x, y, SEGMENT_SIZE, SEGMENT_SIZE)
 	}
