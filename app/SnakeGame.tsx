@@ -90,11 +90,30 @@ export default function SnakeGame() {
 	}
 
 	return (
-		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center">
-			<div className="h-[300px] w-[600px] rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
+		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center space-y-8">
+			<div className="flex space-x-24 text-white">
+				<span>
+					Score:{" "}
+					<span className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
+						12
+					</span>
+				</span>
+				<span>
+					Highscore:{" "}
+					<span className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
+						50
+					</span>
+				</span>
+			</div>
+			<div className="relative h-[300px] w-[600px] rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
+				{gameState === "GAME_OVER" && (
+					<div className="absolute inset-0 flex h-full w-full items-center justify-center">
+						<div className="select-none text-3xl text-white">Game Over</div>
+					</div>
+				)}
 				<Canvas ref={canvasRef} draw={drawFn} onKeyDown={handleKeydown} />
 			</div>
-			<div className="mt-8 w-fit rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
+			<div className="w-fit rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
 				{gameState === "GAME_OVER" ? (
 					<button
 						className="bg-white px-6 py-2 text-black"
