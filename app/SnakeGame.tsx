@@ -328,7 +328,7 @@ function useSnakeGame(
 		}
 
 		if (food && isSnakeGoingToEatFoodNextFrame()) {
-			setSegments([...segments, food])
+			setSegments([food, ...segments])
 			setFood(undefined)
 			return
 		}
