@@ -2,7 +2,9 @@
 
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 
-// Interface
+// Types and Interfaces
+type GameState = "PLAYING" | "GAME_OVER"
+
 interface Coordinate {
 	x: number
 	y: number
@@ -13,6 +15,7 @@ const SPEED = 75 // ms; This will be passed to setInterval, so the lower the fas
 const SEGMENT_SIZE = 5 // px; How many pixels each snake segment or food will take
 const CANVAS_WIDTH = 300 // px; internal canvas width
 const CANVAS_HEIGHT = 150 // px; internal canvas height
+const INITIAL_SPAWN_COORDINATE = { x: 0, y: 0 } // px; Where the snake will spawn
 
 // Helpers
 const moveSnake = {
@@ -45,19 +48,32 @@ const moveSnake = {
 // Entry point
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
-	const { segments, food, handleKeydown } = useSnakeGame()
+	const [gameState, setGameState] = useState<GameState>("PLAYING")
+
+	const { segments, food, handleKeydown, resetGame } = useSnakeGame(
+		gameState,
+		setGameState
+	)
 
 	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments, food)
 
+	const restartGame = () => {
+		resetGame()
+		setGameState("PLAYING")
+	}
+
 	return (
-		<Canvas
-			ref={canvasRef}
-			draw={drawFn}
-			onKeyDown={handleKeydown}
-			tabIndex={0}
-		>
-			<h1>Snake Game</h1>
-		</Canvas>
+		<>
+			<Canvas
+				ref={canvasRef}
+				draw={drawFn}
+				onKeyDown={handleKeydown}
+				tabIndex={0}
+			/>
+			{gameState === "GAME_OVER" && (
+				<button onClick={restartGame}>Play Again</button>
+			)}
+		</>
 	)
 }
 
@@ -126,8 +142,13 @@ function draw(
 }
 
 // Controls the logic of the game
-function useSnakeGame() {
-	const [segments, setSegments] = useState<Coordinate[]>([{ x: 0, y: 0 }])
+function useSnakeGame(
+	gameState: GameState,
+	setGameState: React.Dispatch<React.SetStateAction<GameState>>
+) {
+	const [segments, setSegments] = useState<Coordinate[]>([
+		INITIAL_SPAWN_COORDINATE,
+	])
 	const [food, setFood] = useState<Coordinate | undefined>(undefined)
 	const [direction, setDirection] = useState<
 		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
@@ -172,6 +193,19 @@ function useSnakeGame() {
 		}
 	}
 
+	const isSnakeEatingItself = () => {
+		const segmentsWithoutHead = segments.slice(1)
+
+		if (segmentsWithoutHead.length <= 1) {
+			return false
+		}
+
+		return segmentsWithoutHead.some(
+			(segment) =>
+				segment.x === headCoordinate.x && segment.y === headCoordinate.y
+		)
+	}
+
 	const isSnakeGoingToEatFoodNextFrame = () => {
 		if (!food) return false
 
@@ -201,6 +235,11 @@ function useSnakeGame() {
 
 	const handleFrameUpdate = () => {
 		let newSegmentCoordinates: Coordinate[] | undefined
+
+		if (isSnakeEatingItself()) {
+			setGameState("GAME_OVER")
+			return
+		}
 
 		if (food && isSnakeGoingToEatFoodNextFrame()) {
 			setSegments([...segments, food])
@@ -259,15 +298,21 @@ function useSnakeGame() {
 		setSegments(newSegmentCoordinates)
 	}
 
+	const resetGame = () => {
+		setSegments([INITIAL_SPAWN_COORDINATE])
+		setFood(undefined)
+		setDirection(undefined)
+	}
+
 	useEffect(() => {
 		if (!food) {
 			setFood(spawnFoodRandom())
 		}
 	}, [food])
 
-	useInterval(handleFrameUpdate, SPEED)
+	useInterval(handleFrameUpdate, gameState === "PLAYING" ? SPEED : null)
 
-	return { segments, food, handleKeydown }
+	return { segments, food, handleKeydown, resetGame }
 }
 
 // https://usehooks-ts.com/react-hook/use-interval
