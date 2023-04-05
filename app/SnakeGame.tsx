@@ -5,6 +5,8 @@ import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 // Types and Interfaces
 type GameState = "PLAYING" | "PAUSED" | "GAME_OVER"
 
+type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT"
+
 interface Coordinate {
 	x: number
 	y: number
@@ -22,6 +24,8 @@ const INITIAL_SPAWN_COORDINATES = [
 	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE * 3, y: CANVAS_HEIGHT / 2 },
 	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE * 4, y: CANVAS_HEIGHT / 2 },
 ] // px; Where the snake will spawn
+const INITIAL_DIRECTION: Direction = "RIGHT"
+const INITIAL_GAME_STATE: GameState = "PAUSED"
 
 // Helpers
 const moveSnake = {
@@ -54,7 +58,7 @@ const moveSnake = {
 // Entry point
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
-	const [gameState, setGameState] = useState<GameState>("PLAYING")
+	const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE)
 
 	const { segments, food, handleKeydown, resetGame } = useSnakeGame(
 		gameState,
@@ -183,9 +187,7 @@ function useSnakeGame(
 		INITIAL_SPAWN_COORDINATES
 	)
 	const [food, setFood] = useState<Coordinate | undefined>(undefined)
-	const [direction, setDirection] = useState<
-		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
-	>(undefined)
+	const [direction, setDirection] = useState<Direction>(INITIAL_DIRECTION)
 
 	const headCoordinate = segments[0]
 	const isTouchingTopBoundary = headCoordinate.y <= 0
@@ -334,7 +336,7 @@ function useSnakeGame(
 	const resetGame = () => {
 		setSegments(INITIAL_SPAWN_COORDINATES)
 		setFood(undefined)
-		setDirection(undefined)
+		setDirection(INITIAL_DIRECTION)
 	}
 
 	useEffect(() => {
