@@ -243,13 +243,16 @@ function useSnakeGame(
 	}
 
 	const isSnakeEatingItself = () => {
-		const segmentsWithoutHead = segments.slice(1)
+		const segmentsWithoutHeadAndTail = segments.slice(
+			1,
+			segments.length - SNAKE_TAIL_LENGTH
+		)
 
-		if (segmentsWithoutHead.length <= 1) {
+		if (segmentsWithoutHeadAndTail.length <= 1) {
 			return false
 		}
 
-		return segmentsWithoutHead.some(
+		return segmentsWithoutHeadAndTail.some(
 			(segment) =>
 				segment.x === headCoordinate.x && segment.y === headCoordinate.y
 		)
