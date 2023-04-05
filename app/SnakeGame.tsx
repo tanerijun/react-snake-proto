@@ -15,7 +15,13 @@ const SPEED = 75 // ms; This will be passed to setInterval, so the lower the fas
 const SEGMENT_SIZE = 5 // px; How many pixels each snake segment or food will take
 const CANVAS_WIDTH = 300 // px; internal canvas width
 const CANVAS_HEIGHT = 150 // px; internal canvas height
-const INITIAL_SPAWN_COORDINATE = { x: 0, y: 0 } // px; Where the snake will spawn
+const INITIAL_SPAWN_COORDINATES = [
+	{ x: CANVAS_WIDTH / 3, y: CANVAS_HEIGHT / 2 },
+	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE, y: CANVAS_HEIGHT / 2 },
+	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE * 2, y: CANVAS_HEIGHT / 2 },
+	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE * 3, y: CANVAS_HEIGHT / 2 },
+	{ x: CANVAS_WIDTH / 3 - SEGMENT_SIZE * 4, y: CANVAS_HEIGHT / 2 },
+] // px; Where the snake will spawn
 
 // Helpers
 const moveSnake = {
@@ -173,9 +179,9 @@ function useSnakeGame(
 	gameState: GameState,
 	setGameState: React.Dispatch<React.SetStateAction<GameState>>
 ) {
-	const [segments, setSegments] = useState<Coordinate[]>([
-		INITIAL_SPAWN_COORDINATE,
-	])
+	const [segments, setSegments] = useState<Coordinate[]>(
+		INITIAL_SPAWN_COORDINATES
+	)
 	const [food, setFood] = useState<Coordinate | undefined>(undefined)
 	const [direction, setDirection] = useState<
 		"UP" | "DOWN" | "LEFT" | "RIGHT" | undefined
@@ -326,7 +332,7 @@ function useSnakeGame(
 	}
 
 	const resetGame = () => {
-		setSegments([INITIAL_SPAWN_COORDINATE])
+		setSegments(INITIAL_SPAWN_COORDINATES)
 		setFood(undefined)
 		setDirection(undefined)
 	}
