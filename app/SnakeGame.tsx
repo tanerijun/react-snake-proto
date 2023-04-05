@@ -68,14 +68,14 @@ function spawnFoodRandom(): Coordinate {
 export default function SnakeGame() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE)
-	const [score, setScore] = useState(0)
 	const [highscore, setHighscore] = useState(0)
 
 	const { segments, food, handleKeydown, resetGame } = useSnakeGame(
 		gameState,
-		setGameState,
-		setScore
+		setGameState
 	)
+
+	const score = segments.length - INITIAL_SPAWN_COORDINATES.length
 
 	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments, food)
 
@@ -229,8 +229,7 @@ function draw(
 // Controls the logic of the game
 function useSnakeGame(
 	gameState: GameState,
-	setGameState: React.Dispatch<React.SetStateAction<GameState>>,
-	setScore: React.Dispatch<React.SetStateAction<number>>
+	setGameState: React.Dispatch<React.SetStateAction<GameState>>
 ) {
 	const [segments, setSegments] = useState<Coordinate[]>(
 		INITIAL_SPAWN_COORDINATES
@@ -330,7 +329,6 @@ function useSnakeGame(
 
 		if (food && isSnakeGoingToEatFoodNextFrame()) {
 			setSegments([...segments, food])
-			setScore((score) => score + 1)
 			setFood(undefined)
 			return
 		}
@@ -389,7 +387,6 @@ function useSnakeGame(
 	const resetGame = () => {
 		setSegments(INITIAL_SPAWN_COORDINATES)
 		setFood(undefined)
-		setScore(0)
 		setDirection(INITIAL_DIRECTION)
 	}
 
