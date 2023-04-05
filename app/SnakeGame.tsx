@@ -1,5 +1,6 @@
 "use client"
 
+import FocusTrap from "focus-trap-react"
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 // Types and Interfaces
@@ -67,28 +68,31 @@ export default function SnakeGame() {
 
 	const drawFn = (ctx: CanvasRenderingContext2D) => draw(ctx, segments, food)
 
+	const focusCanvas = () => {
+		if (!canvasRef.current) return
+		canvasRef.current.focus()
+	}
+
 	const restartGame = () => {
 		resetGame()
 		setGameState("PLAYING")
+		focusCanvas()
 	}
 
 	const pauseGame = () => {
 		setGameState("PAUSED")
+		focusCanvas()
 	}
 
 	const playGame = () => {
 		setGameState("PLAYING")
+		focusCanvas()
 	}
 
 	return (
 		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center">
 			<div className="h-[300px] w-[600px] rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
-				<Canvas
-					ref={canvasRef}
-					draw={drawFn}
-					onKeyDown={handleKeydown}
-					tabIndex={0}
-				/>
+				<Canvas ref={canvasRef} draw={drawFn} onKeyDown={handleKeydown} />
 			</div>
 			<div className="mt-8 w-fit rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1">
 				{gameState === "GAME_OVER" ? (
@@ -154,6 +158,7 @@ const Canvas = forwardRef<
 			className="h-full w-full border-2 bg-black"
 			width={CANVAS_WIDTH} // internal canvas width
 			height={CANVAS_HEIGHT} // internal canvas height
+			tabIndex={0}
 			{...props}
 		/>
 	)
